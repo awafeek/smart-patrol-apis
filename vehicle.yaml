@@ -1,1 +1,606 @@
-
+openapi: 3.0.0
+servers:
+  - url: 'http://smartpatrol.dev/v1/api'
+info:
+  description: >-
+    This is the APIs for vehicles component within the smart patrol solution
+  version: 1.0.0
+  title: OpenAPI vehicles APIs
+  license:
+    name: Apache-2.0
+    url: 'https://www.apache.org/licenses/LICENSE-2.0.html'
+tags:
+  - name: vehicle
+    description: APIs needed for vehicles component
+  - name: Image
+    description: APIs needed for managing vehicle status   
+  - name: Status
+    description: APIs needed for managing vehicle status  
+  - name: Blacklist
+    description: APIs needed for trackinglist
+paths:
+  /vehicle:
+    get:
+      tags:
+        - vehicle
+      summary: Get all vehicles
+      description: 'Get all vehicles'
+      operationId: getVehicles
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:  
+                  $ref: '#/components/schemas/vehicle'
+        '405':
+          description: Invalid input
+      security:
+        - vehiclestore_auth:
+            - 'write:vehicles'
+            - 'read:vehicles'
+    post:
+      tags:
+        - vehicle
+      summary: Add Vehicle
+      description: 'adds a new vehicle to the system'
+      operationId: addVehicle
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/vehicle'   
+        '405':
+          description: Invalid input
+      security:
+        - vehiclestore_auth:
+            - 'write:vehicles'
+            - 'read:vehicles'
+      requestBody:
+        $ref: '#/components/requestBodies/vehicle'
+  /vehicle/{vehicleId}:
+    get:
+      tags:
+        - vehicle
+      summary: Find vehicle by ID
+      description: Returns a single vehicle
+      operationId: getvehicleById
+      parameters:
+        - name: vehicleId
+          in: path
+          description: ID of vehicle to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/vehicle'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: vehicle not found
+      security:
+        - api_key: []
+    put:
+      tags:
+        - vehicle
+      summary: Updates an existing vehicle
+      description: 'Updates an existing vehicle'
+      operationId: updateVehicle
+      parameters:
+        - name: vehicleId
+          in: path
+          description: ID of vehicle that needs to be updated
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/vehicle'   
+        '405':
+          description: Invalid input
+      security:
+        - vehiclestore_auth:
+            - 'write:vehicles'
+            - 'read:vehicles'
+      requestBody:
+        $ref: '#/components/requestBodies/vehicle'
+    delete:
+      tags:
+        - vehicle
+      summary: Deletes a vehicle
+      description: 'Deletes a vehicle'
+      operationId: deletevehicle
+      parameters:
+        - name: vehicleId
+          in: path
+          description: vehicle id to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation  
+        '400':
+          description: Invalid vehicle value
+      security:
+        - vehiclestore_auth:
+            - 'write:vehicles'
+            - 'read:vehicles'
+  /vehicle/{vehicleId}/image:
+    post:
+      tags:
+        - Image
+      summary: Add Vehicle Image
+      description: 'adds an image for the vehicle'
+      operationId: addVehicleImage
+      parameters:
+        - name: vehicleId
+          in: path
+          description: ID of vehicle
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+      security:
+        - vehiclestore_auth:
+            - 'write:vehicles'
+            - 'read:vehicles'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                metadata:
+                  description: Additional data to pass to server
+                  type: string
+                file:
+                  description: Vehicle image
+                  type: string
+                  format: binary
+    get:
+      tags:
+        - Image
+      summary: Get Vehicle Image
+      description: 'Gets image for the vehicle'
+      operationId: getVehicleImage
+      parameters:
+        - name: vehicleId
+          in: path
+          description: ID of vehicle
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            multipart/form-data:
+                schema:
+                    type: object
+                    properties:
+                        metadata:
+                            description: Additional data to pass to server
+                            type: string
+                        file:
+                            description: Vehicle image
+                            type: string
+                            format: binary
+      security:
+        - vehiclestore_auth:
+            - 'write:vehicles'
+            - 'read:vehicles'                            
+  /vehicle/status:
+    get:
+      tags:
+        - Status
+      summary: Get Vehicle Statuses
+      description: >-
+        Get list of vehicle statuses
+      operationId: getVehicleStatuses
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Status'
+        '400':
+          description: Invalid tag value
+      security:
+        - vehiclestore_auth:
+            - 'read:vehicles'
+      deprecated: true
+    post:
+      tags:
+        - Status
+      summary: Add Vehicle status
+      description: 'adds a new status for vehicle'
+      operationId: addVehicleStatus
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'  
+        '405':
+          description: Invalid input
+      security:
+        - vehiclestore_auth:
+            - 'write:vehicles'
+            - 'read:vehicles'
+      requestBody:
+        $ref: '#/components/requestBodies/Status'  
+  /vehicle/status/{statusID}:
+    get:
+      tags:
+        - Status
+      summary: Get Vehicle Status by ID
+      description: Returns a single vehicle status
+      operationId: getVehicleStatusById
+      parameters:
+        - name: statusID
+          in: path
+          description: ID of vehicle status to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: vehicle not found
+      security:
+        - api_key: []
+    put:
+      tags:
+        - Status
+      summary: Updates an existing vehicle status
+      description: 'Updates an existing vehicle status'
+      operationId: updateVehicleStatus
+      parameters:
+        - name: statusID
+          in: path
+          description: ID of vehicle status that needs to be updated
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'   
+        '405':
+          description: Invalid input
+      security:
+        - vehiclestore_auth:
+            - 'write:vehicles'
+            - 'read:vehicles'
+      requestBody:
+        $ref: '#/components/requestBodies/Status'
+    delete:
+      tags:
+        - Status
+      summary: Deletes a vehicle status
+      description: 'Deletes a vehicle status'
+      operationId: deleteVehicleStatus
+      parameters:
+        - name: statusID
+          in: path
+          description: vehicle status id to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation 
+        '400':
+          description: Invalid vehicle value
+      security:
+        - vehiclestore_auth:
+            - 'write:vehicles'
+            - 'read:vehicles' 
+  /vehicle/{vehicleId}/blacklist:
+    post:
+      tags:
+        - Blacklist
+      summary: Add Vehicle to Blacklist
+      description: 'adds a vehicle to blacklist'
+      operationId: addVehicleToBlacklist
+      parameters:
+        - name: vehicleId
+          in: path
+          description: ID of vehicle that needs to be blacklisted
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation  
+        '405':
+          description: Invalid input
+      security:
+        - vehiclestore_auth:
+            - 'write:vehicles'
+            - 'read:vehicles'
+    delete:
+      tags:
+        - Blacklist
+      summary: Delete Vehicle from Blacklist
+      description: 'Deletes a vehicle from blacklist'
+      operationId: deleteVehicleFromBlacklist
+      parameters:
+        - name: vehicleId
+          in: path
+          description: vehicle id to be unblacklisted
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation  
+        '400':
+          description: Invalid vehicle value
+      security:
+        - vehiclestore_auth:
+            - 'write:vehicles'
+            - 'read:vehicles'            
+externalDocs:
+  description: Find out more about Swagger
+  url: 'http://swagger.io'
+components:
+  requestBodies:
+    VehicleList:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/vehicle'
+      description: List of vehicle object
+      required: true
+    vehicle:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/vehicle'
+      description: vehicle object that needs to be added to the system
+      required: true
+    Status:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Status'
+      description: vehicle status object that needs to be added/updated to the system
+      required: true  
+  securitySchemes:
+    vehiclestore_auth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: 'http://smartpatrol.dev/api/oauth/dialog'
+          scopes:
+            'write:vehicles': modify vehicles in your account
+            'read:vehicles': read your vehicles
+    api_key:
+      type: apiKey
+      name: api_key
+      in: header
+  schemas:
+    License:
+      title: vehicle license
+      description: A license for a vehicle
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        vehicleID:
+          type: integer
+          format: int64
+        governorate:
+          $ref: '#/components/schemas/Governorate'    
+        plateNumber:
+          type: string
+          example: 223 efs 
+        issueDate:
+          type: string
+          format: date
+          example: "2021-01-30"
+        endDate:
+          type: string
+          format: date
+          example: "2021-05-30"
+        notificationIssueDate:
+          type: string
+          format: date
+          example: "2021-04-30"
+        taxExpiryDate:
+          type: string
+          format: date
+          example: "2021-05-30"      
+    OwnerType:
+      title: a owner type
+      description: A owner type for the vehicle
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        nameEN:
+          type: string
+        nameAR:
+          type: string
+    Status:
+      title: vehicle status
+      description: A status for a vehicle
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        nameEN:
+          type: string
+          example: Pending
+        nameAR:
+          type: string
+          example: مؤجل
+    Governorate:
+      title: vehicle governorate
+      description: A governorate for a vehicle
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        nameEN:
+          type: string
+        nameAR:
+          type: string
+    Brand:
+      title: vehicle brand
+      description: A brand for a vehicle
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        nameEN:
+          type: string
+        nameAR:
+          type: string    
+    Model:
+      title: vehicle model
+      description: A model for a vehicle
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        nameEN:
+          type: string
+        nameAR:
+          type: string 
+    Color:
+      title: vehicle color
+      description: A color for a vehicle
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        nameEN:
+          type: string
+        nameAR:
+          type: string    
+    Classification:
+      title: vehicle classification or category
+      description: A classification for a vehicle
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        nameEN:
+          type: string
+        nameAR:
+          type: string 
+    Person:
+      title: a person
+      description: A person entity
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        nationality:
+          $ref: '#/components/schemas/Nationality'
+        nameEN:
+          type: string
+          example: Ahmed Wafeek
+        nameAR:
+          type: string
+          example: احمد وفيق
+        birthDate:
+          type: string
+          format: date
+          example: "2021-01-30"
+        IDDocumentNo:
+          type: string
+          example: "255811155555251"
+        status:
+          $ref: '#/components/schemas/Status'                            
+    vehicle:
+      title: a vehicle
+      description: A vehicle entity
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        license:
+          $ref: '#/components/schemas/License'
+        status:
+          $ref: '#/components/schemas/Status'  
+        brand:
+          $ref: '#/components/schemas/Brand'
+        model:
+          $ref: '#/components/schemas/Model'
+        color:
+          $ref: '#/components/schemas/Color'
+        classification:
+          $ref: '#/components/schemas/Classification'
+        owner:
+          $ref: '#/components/schemas/Person'
+    ApiResponse:
+      title: An uploaded response
+      description: Describes the result of uploading an image resource
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        type:
+          type: string
+        message:
+          type: string
