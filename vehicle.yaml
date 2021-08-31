@@ -37,6 +37,8 @@ paths:
                   $ref: '#/components/schemas/vehicle'
         '405':
           description: Invalid input
+          $ref: '#/components/requestBodies/ErrorResponse'
+            
       security:
         - vehiclestore_auth:
             - 'write:vehicles'
@@ -412,7 +414,14 @@ components:
           schema:
             $ref: '#/components/schemas/Status'
       description: vehicle status object that needs to be added/updated to the system
-      required: true  
+      required: true
+    ErrorResponse:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Error response for APIs
+      required: true    
   securitySchemes:
     vehiclestore_auth:
       type: oauth2
@@ -604,3 +613,18 @@ components:
           type: string
         message:
           type: string
+    Error:
+      title: Error Response 
+      description: Describes the structure of an error response
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+          example: 405
+        type:
+          type: string
+          example: Invalid Input
+        message:
+          type: string
+          example: one or more fields are corrupted      
