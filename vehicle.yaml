@@ -420,7 +420,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-      description: Error response for APIs
       required: true    
   securitySchemes:
     vehiclestore_auth:
